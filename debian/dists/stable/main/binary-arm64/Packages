@@ -1,0 +1,15 @@
+Package: paping-go
+Version: 0.1.2
+Architecture: arm64
+Maintainer: basecubedev <contact@basecubedev.de>
+Installed-Size: 6148
+Filename: pool/main/p/paping-go/paping-go_0.1.2_arm64.deb
+Size: 3272510
+MD5sum: 15ef2efe60930b5fd6e96fad2b124561
+SHA1: a54ab4ed68125138ba7afda7a840ca555d629a23
+SHA256: 32a5c5b89b526437b3a91b302128894d61b3774514d550ca5cccc93fcd19cbd2
+Section: utils
+Priority: optional
+Homepage: https://github.com/basecubedev/paping-go
+Description: TCP port ping utility written in Go
+
