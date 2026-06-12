@@ -47,3 +47,7 @@ gh workflow run update-apt.yml \
 ```
 
 The workflow owns all APT repository generation, signing, and verification logic. Source repositories should only publish release assets and trigger this workflow; they should not copy `.deb` files into this repository manually. Private signing keys must never be committed.
+
+## Maintenance
+
+GitHub Actions dependencies are kept up to date with Dependabot. Dependabot opens pull requests for workflow action updates on a weekly schedule.
