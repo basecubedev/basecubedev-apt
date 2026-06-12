@@ -1,0 +1,130 @@
+name: Update APT Repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "Source repository, e.g. basecubedev/paping-go"
+        required: true
+        default: "basecubedev/paping-go"
+      tag:
+        description: "Release tag, e.g. v0.1.1"
+        required: true
+      package:
+        description: "Package name"
+        required: true
+        default: "paping-go"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+
+      - name: Install APT repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils gnupg gzip gh
+
+      - name: Download release Debian packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REPO: ${{ inputs.source_repo }}
+          TAG: ${{ inputs.tag }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$PACKAGE" =~ ^[a-z0-9][a-z0-9+.-]*$ ]]; then
+            echo "error: invalid package name: $PACKAGE" >&2
+            exit 1
+          fi
+
+          download_with_retry() {
+            local pattern=$1
+            local attempt
+
+            for attempt in 1 2 3 4 5; do
+              echo "Download attempt $attempt for pattern: $pattern"
+              if gh release download "$TAG" \
+                --repo "$SOURCE_REPO" \
+                --pattern "$pattern" \
+                --dir incoming \
+                --clobber; then
+                return 0
+              fi
+              sleep 10
+            done
+
+            echo "error: failed to download release asset pattern: $pattern" >&2
+            return 1
+          }
+
+          mkdir -p incoming
+
+          download_with_retry "${PACKAGE}_*_amd64.deb"
+          download_with_retry "${PACKAGE}_*_arm64.deb"
+
+          find incoming -maxdepth 1 -type f -name "${PACKAGE}_*_amd64.deb" -print -quit | grep -q .
+          find incoming -maxdepth 1 -type f -name "${PACKAGE}_*_arm64.deb" -print -quit | grep -q .
+
+      - name: Import APT signing key
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$APT_GPG_PRIVATE_KEY"
+
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          mkdir -p "$GNUPGHOME"
+          chmod 700 "$GNUPGHOME"
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --list-secret-keys
+
+      - name: Update repository metadata
+        env:
+          PACKAGE: ${{ inputs.package }}
+          APT_GPG_KEY_ID: ${{ secrets.APT_GPG_KEY_ID }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          scripts/update-repo.sh incoming
+
+      - name: Verify repository
+        env:
+          PACKAGE: ${{ inputs.package }}
+        run: scripts/verify-repo.sh
+
+      - name: Commit and push changes
+        env:
+          TAG: ${{ inputs.tag }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          set -euo pipefail
+          publish_paths=(
+            index.html
+            .nojekyll
+            CNAME
+            README.md
+            apt-ftparchive.conf
+            basecubedev-archive-keyring.gpg
+            scripts
+            .github/workflows
+            debian
+          )
+
+          if [[ -z "$(git status --porcelain -- "${publish_paths[@]}")" ]]; then
+            echo "No APT repository changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${publish_paths[@]}"
+          git commit -m "Update APT repo for ${PACKAGE} ${TAG}"
+          git push
