@@ -43,70 +43,65 @@
   <h1>basecubedev APT Repository</h1>
 
   <p>
-    This is the official Debian/Ubuntu package repository for selected
+    Official public Debian/Ubuntu package repository for selected
     basecubedev open source projects.
   </p>
 
   <p class="note">
-    This is a third-party APT repository. Only add it if you trust
+    This is a third-party APT repository. Add it only if you trust
     basecubedev as the package publisher.
   </p>
 
-  <h2>Install repository key</h2>
+  <h2>Available packages</h2>
+
+  <ul>
+    <li><code>paping-go</code> - TCP port ping utility written in Go</li>
+  </ul>
+
+  <h2>Quick install</h2>
 
   <pre><code>sudo install -d -m 0755 /etc/apt/keyrings
 
 curl -fsSL https://repo.basecubedev.de/basecubedev-archive-keyring.gpg \
-  | sudo tee /etc/apt/keyrings/basecubedev.gpg &gt; /dev/null</code></pre>
+  | sudo tee /etc/apt/keyrings/basecubedev.gpg &gt; /dev/null
 
-  <h2>Add APT repository</h2>
-
-  <pre><code>echo "deb [signed-by=/etc/apt/keyrings/basecubedev.gpg] https://repo.basecubedev.de/debian stable main" \
+echo "deb [signed-by=/etc/apt/keyrings/basecubedev.gpg] https://repo.basecubedev.de/debian stable main" \
   | sudo tee /etc/apt/sources.list.d/basecubedev.list
 
-sudo apt update</code></pre>
+sudo apt update
+sudo apt install paping-go</code></pre>
 
-  <h2>Install packages</h2>
+  <h2>Verify repository / package info</h2>
 
-  <h3>paping-go</h3>
-
-  <pre><code>sudo apt install paping-go</code></pre>
-
-  <p>
-    Project page:
-    <a href="https://github.com/basecubedev/paping-go">github.com/basecubedev/paping-go</a>
-  </p>
-
-  <h2>Archive signing key</h2>
-
-  <p>
-    The repository metadata is signed with the basecubedev APT archive key.
-  </p>
-
-  <pre><code>Fingerprint:
-8F26 0E4D 9FD4 BDA3 9E28  547E 541A 3768 67EB B9BA</code></pre>
-
-  <p>
-    If the archive key is manually rotated, this fingerprint must be updated
-    to match the public key served by the repository.
-  </p>
-
-  <h2>Repository paths</h2>
-
-  <pre><code>APT root:
-https://repo.basecubedev.de/debian
-
-Release metadata:
-https://repo.basecubedev.de/debian/dists/stable/InRelease
-
-Public archive key:
-https://repo.basecubedev.de/basecubedev-archive-keyring.gpg</code></pre>
+  <pre><code>apt-cache policy paping-go
+apt show paping-go</code></pre>
 
   <h2>Remove repository</h2>
 
   <pre><code>sudo rm -f /etc/apt/sources.list.d/basecubedev.list
 sudo rm -f /etc/apt/keyrings/basecubedev.gpg
 sudo apt update</code></pre>
+
+  <h2>Signing key</h2>
+
+  <p>
+    The repository metadata is signed with the basecubedev APT archive key.
+  </p>
+
+  <pre><code>DD12 048C E83D 87A5 A67A  974B 8B71 DCDC B8A2 4912</code></pre>
+
+  <h2>Repository layout</h2>
+
+  <p>
+    APT metadata is published under <code>/debian/dists</code>, and package
+    files are published under <code>/debian/pool</code>.
+  </p>
+
+  <pre><code>APT root:
+https://repo.basecubedev.de/debian
+
+Public archive key:
+https://repo.basecubedev.de/basecubedev-archive-keyring.gpg</code></pre>
 
   <p class="meta">
     basecubedev APT Repository · Hosted on GitHub Pages

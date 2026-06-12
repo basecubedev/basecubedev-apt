@@ -1,8 +1,16 @@
 # basecubedev APT Repository
 
-Static Debian/Ubuntu APT repository for basecubedev packages, published with GitHub Pages at `repo.basecubedev.de`.
+Official public Debian/Ubuntu package repository for selected basecubedev open source projects.
 
-## Install
+This is a third-party APT repository. Add it only if you trust basecubedev as the package publisher.
+
+## Available packages
+
+- `paping-go` - TCP port ping utility written in Go
+
+## Quick install
+
+Add the repository key, configure the APT source, update APT, and install `paping-go`:
 
 ```bash
 sudo install -d -m 0755 /etc/apt/keyrings
@@ -17,37 +25,60 @@ sudo apt update
 sudo apt install paping-go
 ```
 
-Current archive signing key fingerprint:
-
-```text
-8F26 0E4D 9FD4 BDA3 9E28  547E 541A 3768 67EB B9BA
-```
-
-The fingerprint shown here must match the public key served from `https://repo.basecubedev.de/basecubedev-archive-keyring.gpg`. If the archive key is manually rotated, update this fingerprint in the same change.
-
-## Automated Updates
-
-Repository updates are fully automated after `paping-go` releases. The source repository publishes the GitHub Release assets, then triggers `.github/workflows/update-apt.yml` in this repository. This repository downloads the release `.deb` assets itself, requires both `amd64` and `arm64` packages, regenerates and signs the APT metadata, verifies signatures and package contents in CI, then commits the static repository back to `main`.
-
-Required repository secrets:
-
-- `APT_GPG_PRIVATE_KEY`: ASCII-armored private key for signing repository metadata.
-- `APT_GPG_PASSPHRASE`: optional passphrase for the private key.
-- `APT_GPG_KEY_ID`: optional signing key ID or fingerprint. If omitted, the workflow uses the first imported secret key.
-
-Manual update trigger:
+After installation, you can check the installed command:
 
 ```bash
-gh workflow run update-apt.yml \
-  --repo basecubedev/basecubedev-apt \
-  --ref main \
-  -f source_repo=basecubedev/paping-go \
-  -f tag=v0.1.2 \
-  -f package=paping-go
+paping-go --version
+paping-go --help
 ```
 
-The workflow owns all APT repository generation, signing, and verification logic. Source repositories should only publish release assets and trigger this workflow; they should not copy `.deb` files into this repository manually. Private signing keys must never be committed.
+## Verify repository / package info
 
-## Maintenance
+Use APT to inspect which repository provides `paping-go` and which package metadata is available:
 
-GitHub Actions dependencies are kept up to date with Dependabot. Dependabot opens pull requests for workflow action updates on a weekly schedule.
+```bash
+apt-cache policy paping-go
+apt show paping-go
+```
+
+## Remove repository
+
+Remove the APT source and keyring, then refresh APT:
+
+```bash
+sudo rm -f /etc/apt/sources.list.d/basecubedev.list
+sudo rm -f /etc/apt/keyrings/basecubedev.gpg
+sudo apt update
+```
+
+## Signing key
+
+The repository metadata is signed with the basecubedev APT archive key.
+
+Current public signing key fingerprint:
+
+```text
+DD12 048C E83D 87A5 A67A  974B 8B71 DCDC B8A2 4912
+```
+
+The fingerprint must match the public key served from:
+
+```text
+https://repo.basecubedev.de/basecubedev-archive-keyring.gpg
+```
+
+## Repository layout
+
+The static APT repository is published at:
+
+```text
+https://repo.basecubedev.de/debian
+```
+
+APT metadata is stored under `/debian/dists`, and package files are stored under `/debian/pool`.
+
+## Maintainer notes
+
+This repository is updated automatically. Source projects publish `.deb` files as GitHub Release assets and then trigger the `update-apt.yml` workflow in this repository. The workflow downloads the release assets, regenerates APT metadata, signs `InRelease` and `Release.gpg`, verifies the repository, and commits the updated static repository back to `main`.
+
+Private signing keys must never be committed.
