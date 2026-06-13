@@ -1,13 +1,13 @@
 Package: paping-go
-Version: 0.1.2
+Version: 0.1.3
 Architecture: amd64
 Maintainer: basecubedev <contact@basecubedev.de>
-Installed-Size: 6392
-Filename: pool/main/p/paping-go/paping-go_0.1.2_amd64.deb
-Size: 3573660
-MD5sum: e3e1fdb0d7e5ed1cf93fb096fb5ebc8b
-SHA1: 94006514ef93c69e046c0f7266c7063432937a5c
-SHA256: 097c87c4eae32c4b8a7d76c17d9304621d08b9542d20c4cd6718613660e2034f
+Installed-Size: 6436
+Filename: pool/main/p/paping-go/paping-go_0.1.3_amd64.deb
+Size: 3597570
+MD5sum: 65f4cc71b8697c143d21747aded40d3e
+SHA1: f5b7e98d9ca285d7f3bbed4080f060e5b323cbc3
+SHA256: 4a0373fb263e1b6cf149e7cbdc0c030023e7ade5c1ccd178e646ee268baba1c0
 Section: utils
 Priority: optional
 Homepage: https://github.com/basecubedev/paping-go
